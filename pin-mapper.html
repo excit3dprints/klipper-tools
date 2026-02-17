@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pin Mapper — Klipper Tools</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/pin-mapper.css">
+</head>
+<body class="tool-page">
+    <!-- Topbar -->
+    <div class="app-topbar">
+        <div class="app-brand">
+            <a href="index.html" class="brand-link">
+                <h1>&#10022; Klipper Tools</h1>
+            </a>
+            <div class="subtitle">Excit3D Community</div>
+        </div>
+        <nav class="tool-nav">
+            <a href="pin-mapper.html" class="tool-nav-link active">Pin Mapper</a>
+            <a href="pa-calc.html" class="tool-nav-link ">PA Calculator</a>
+            <a href="index.html" class="tool-nav-link tool-nav-home">&#8592; All Tools</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <!-- Board selector row -->
+            <div class="board-selector-row">
+                <label style="font-size:0.7rem;color:var(--text-secondary)">Board:</label>
+                <select id="boardSelect" onchange="onBoardChange()">
+                    <option value="auto">Auto-detect</option>
+                    <optgroup label="BTT Octopus Pro">
+                        <option value="octopus_pro_v1.0">Octopus Pro v1.0</option>
+                        <option value="octopus_pro_v1.1">Octopus Pro v1.1</option>
+                    </optgroup>
+                    <optgroup label="BTT Octopus">
+                        <option value="octopus_v1.1">Octopus v1.1</option>
+                    </optgroup>
+                    <optgroup label="BTT Kraken">
+                        <option value="kraken">Kraken</option>
+                    </optgroup>
+                    <optgroup label="BTT Manta M8P">
+                        <option value="manta_m8p_v1">Manta M8P v1.0/1.1</option>
+                        <option value="manta_m8p_v2">Manta M8P v2.0</option>
+                    </optgroup>
+                </select>
+                <span class="detected-badge" id="detectedBadge" style="display:none;">
+                    <span id="detectedText">Detected</span>
+                </span>
+            </div>
+
+            <div class="main-layout">
+                <!-- Left panel -->
+                <div class="input-panel">
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">Configuration</span></div>
+                        <div class="card-body">
+                            <textarea id="configInput" height="260" style="height:260px" placeholder="Paste your printer.cfg here..."></textarea>
+                            <div class="btn-row">
+                                <button class="btn-primary" onclick="parseConfig()">Map Pins</button>
+                                <button class="btn-secondary" onclick="clearAll()">Clear</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" id="detectionCard" style="display:none;">
+                        <div class="card-header"><span class="card-title">Detection</span></div>
+                        <div class="card-body"><div class="detection-debug" id="detectionDebug"></div></div>
+                    </div>
+
+                    <div class="card" id="includesCard" style="display:none;">
+                        <div class="card-header">
+                            <span class="card-title">Included Files</span>
+                            <span id="includesCount" style="font-size:0.65rem;color:var(--text-muted);"></span>
+                        </div>
+                        <div class="card-body">
+                            <div class="includes-list" id="includesList"></div>
+                            <div style="font-size:0.6rem;color:var(--text-muted);margin-top:0.5rem;">Some config sections may be in these files</div>
+                        </div>
+                    </div>
+
+                    <div class="card" id="conflictsCard" style="display:none;">
+                        <div class="card-header">
+                            <span class="card-title">Pin Conflicts</span>
+                            <span id="conflictsCount" style="font-size:0.65rem;color:var(--error);"></span>
+                        </div>
+                        <div class="card-body"><div id="conflictsList"></div></div>
+                    </div>
+
+                    <div class="card" id="issuesCard" style="display:none;">
+                        <div class="card-header">
+                            <span class="card-title">Issues</span>
+                            <span id="issueCount" style="font-size:0.65rem;color:var(--error);"></span>
+                        </div>
+                        <div class="card-body">
+                            <div class="issues-list" id="issuesList"></div>
+                            <div class="export-section" id="exportSection" style="display:none;">
+                                <button class="btn-secondary btn-small" onclick="toggleExport()">Export Fixes</button>
+                                <textarea class="export-textarea" id="exportTextarea" style="display:none;" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" id="statsCard" style="display:none;">
+                        <div class="card-header"><span class="card-title">Summary</span></div>
+                        <div class="card-body">
+                            <div class="stats-row" id="statsRow"></div>
+                            <div class="endstop-section-label" id="endstopLabel" style="display:none;">Endstop Config</div>
+                            <div class="endstop-list" id="endstopList"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right panel: board viz -->
+                <div class="board-viz">
+                    <div class="card">
+                        <div class="card-header"><span class="card-title" id="vizTitle">Board View</span></div>
+                        <div class="card-body">
+                            <div class="tabs">
+                                <div class="tab active" onclick="switchTab('board')">Visual</div>
+                                <div class="tab" onclick="switchTab('table')">Table</div>
+                            </div>
+                            <div class="tab-content active" id="boardTab">
+                                <div class="board-container" id="boardContainer">
+                                    <div class="empty-state" id="emptyState"><p>Paste your printer.cfg and click "Map Pins"</p></div>
+                                    <div id="boardViz" style="display:none;"></div>
+                                </div>
+                            </div>
+                            <div class="tab-content" id="tableTab">
+                                <div class="table-container" id="tableContainer">
+                                    <div class="empty-state"><p>No data</p></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+        <script src="js/boards.js"></script>
+    <script src="js/pin-mapper.js"></script>
+    <script src="js/pin-mapper-ui.js"></script>
+</body>
+</html>

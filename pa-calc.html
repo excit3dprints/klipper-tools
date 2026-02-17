@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PA Calculator — Klipper Tools</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/pa-calc.css">
+</head>
+<body class="tool-page">
+    <!-- Topbar -->
+    <div class="app-topbar">
+        <div class="app-brand">
+            <a href="index.html" class="brand-link">
+                <h1>&#10022; Klipper Tools</h1>
+            </a>
+            <div class="subtitle">Excit3D Community</div>
+        </div>
+        <nav class="tool-nav">
+            <a href="pin-mapper.html" class="tool-nav-link ">Pin Mapper</a>
+            <a href="pa-calc.html" class="tool-nav-link active">PA Calculator</a>
+            <a href="index.html" class="tool-nav-link tool-nav-home">&#8592; All Tools</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <div class="pa-layout">
+                <!-- Settings sidebar -->
+                <div class="pa-sidebar">
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">Print Settings</span></div>
+                        <div class="card-body">
+                            <div class="pa-setting-row">
+                                <label class="pa-setting-label">Line Width <span class="pa-setting-unit">mm</span></label>
+                                <input class="pa-setting-input" type="number" id="paLineWidth" step="0.001" min="0.1" max="2" value="0.525">
+                            </div>
+                            <div class="pa-setting-row">
+                                <label class="pa-setting-label">Layer Height <span class="pa-setting-unit">mm</span></label>
+                                <input class="pa-setting-input" type="number" id="paLayerHeight" step="0.01" min="0.05" max="1" value="0.2">
+                            </div>
+                            <div class="pa-formula-note">
+                                Flow = Speed × Line Width × Layer Height
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-top:1rem;">
+                        <div class="card-header"><span class="card-title">How to Use</span></div>
+                        <div class="card-body pa-help-text">
+                            <p>1. Set your line width and layer height above</p>
+                            <p>2. Enter your test speeds across the top — flow auto-calculates</p>
+                            <p>3. Enter your target accel values in the left column</p>
+                            <p>4. Fill in each PA value per speed/accel combo</p>
+                            <p>5. Copy output strings directly into your slicer or test script</p>
+                            <p style="margin-top:0.5rem;color:var(--text-muted)">Output format: <span style="color:var(--accent);font-family:monospace">PA, Flow, Accel</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main PA area -->
+                <div class="pa-main">
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">PA Values</span><span style="font-size:0.65rem;color:var(--text-muted)">Edit PA per Speed + Accel combo</span></div>
+                        <div class="card-body">
+                            <div id="paTableWrap"></div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-top:1rem;">
+                        <div class="card-header"><span class="card-title">Output Strings</span><span style="font-size:0.65rem;color:var(--text-muted)">PA, Flow, Accel — copy into test script</span></div>
+                        <div class="card-body">
+                            <div id="paOutputWrap"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/boards.js"></script>
+    <script src="js/pin-mapper.js"></script>
+    <script src="js/pin-mapper-ui.js"></script>
+    <script src="js/pa-calc.js"></script
+    </div>
+
+        <script src="js/pa-calc.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => { initPaCalc(); });
+    </script>
+</body>
+</html>

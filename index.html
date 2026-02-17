@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klipper Tools — Excit3D</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+
+    <div class="hero">
+        <div class="hero-inner">
+            <div class="hero-eyebrow">Excit3D &middot; Community Tools</div>
+            <h1 class="hero-title">Klipper <span>Tools</span></h1>
+            <p class="hero-sub">Browser-based utilities for configuring, validating, and tuning your Klipper-powered printer. No install, no login.</p>
+        </div>
+    </div>
+
+    <div class="tools-section">
+        <div class="section-label">Available Tools</div>
+        <div class="tools-grid">
+
+            <a class="tool-card" href="pin-mapper.html">
+                <div class="tool-card-preview preview-pin-mapper">
+                    <div class="preview-slots">
+                        <div class="preview-slot lit"><div class="ps-id"></div><div class="ps-name lit"></div><div class="ps-pin ok"></div><div class="ps-pin ok"></div></div>
+                        <div class="preview-slot lit"><div class="ps-id"></div><div class="ps-name lit"></div><div class="ps-pin ok"></div><div class="ps-pin ok"></div></div>
+                        <div class="preview-slot err"><div class="ps-id"></div><div class="ps-name err"></div><div class="ps-pin warn"></div><div class="ps-pin ok"></div></div>
+                        <div class="preview-slot lit"><div class="ps-id"></div><div class="ps-name lit"></div><div class="ps-pin ok"></div><div class="ps-pin ok"></div></div>
+                        <div class="preview-slot"><div class="ps-id"></div><div class="ps-name"></div><div class="ps-pin"></div><div class="ps-pin"></div></div>
+                        <div class="preview-slot lit"><div class="ps-id"></div><div class="ps-name lit"></div><div class="ps-pin ok"></div><div class="ps-pin ok"></div></div>
+                        <div class="preview-slot"><div class="ps-id"></div><div class="ps-name"></div><div class="ps-pin"></div><div class="ps-pin"></div></div>
+                        <div class="preview-slot lit"><div class="ps-id"></div><div class="ps-name lit"></div><div class="ps-pin ok"></div><div class="ps-pin ok"></div></div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <div class="tool-card-tag">Config Validation</div>
+                    <h2 class="tool-card-title">Pin Mapper</h2>
+                    <p class="tool-card-desc">Paste your printer.cfg and instantly validate stepper pin assignments against known board pinouts. Catches mismatches, conflicts, and driver issues before they cause problems.</p>
+                    <div class="tool-card-features">
+                        <span class="feature-chip">Auto board detect</span>
+                        <span class="feature-chip">Visual slot layout</span>
+                        <span class="feature-chip">One-click fixes</span>
+                        <span class="feature-chip">Pin conflict check</span>
+                        <span class="feature-chip">TMC validation</span>
+                    </div>
+                    <div class="tool-card-cta">
+                        <span class="tool-card-link">Open tool <span class="tool-card-arrow">&rarr;</span></span>
+                        <span class="tool-card-boards">Octopus &middot; Kraken &middot; Manta</span>
+                    </div>
+                </div>
+            </a>
+
+            <a class="tool-card" href="pa-calc.html">
+                <div class="tool-card-preview preview-pa-calc">
+                    <div class="preview-pa-grid">
+                        <div class="preview-pa-row">
+                            <div class="preview-pa-label"></div>
+                            <div class="preview-pa-cell"><div class="ppc-val" style="background:#c9a0e8;width:24px"></div></div>
+                            <div class="preview-pa-cell"><div class="ppc-val" style="background:#c9a0e8;width:24px"></div></div>
+                            <div class="preview-pa-cell"><div class="ppc-val" style="background:#c9a0e8;width:24px"></div></div>
+                            <div class="preview-pa-cell"><div class="ppc-val" style="background:#c9a0e8;width:24px"></div></div>
+                        </div>
+                        <div class="preview-pa-row">
+                            <div class="preview-pa-label"></div>
+                            <div class="preview-pa-cell"><div class="ppc-val"></div></div>
+                            <div class="preview-pa-cell"><div class="ppc-val"></div></div>
+                            <div class="preview-pa-cell"><div class="ppc-val"></div></div>
+                            <div class="preview-pa-cell"><div class="ppc-val"></div></div>
+                        </div>
+                        <div class="preview-pa-row">
+                            <div class="preview-pa-label"></div>
+                            <div class="preview-pa-cell"><div class="ppc-val" style="width:14px"></div></div>
+                            <div class="preview-pa-cell"><div class="ppc-val" style="width:14px"></div></div>
+                            <div class="preview-pa-cell"><div class="ppc-val" style="width:14px"></div></div>
+                            <div class="preview-pa-cell"><div class="ppc-val" style="width:14px"></div></div>
+                        </div>
+                        <div class="preview-pa-row">
+                            <div class="preview-pa-label"></div>
+                            <div class="preview-pa-cell"><div class="ppc-val" style="width:10px"></div></div>
+                            <div class="preview-pa-cell"><div class="ppc-val" style="width:10px"></div></div>
+                            <div class="preview-pa-cell"><div class="ppc-val" style="width:10px"></div></div>
+                            <div class="preview-pa-cell"><div class="ppc-val" style="width:10px"></div></div>
+                        </div>
+                        <div class="preview-pa-output">
+                            <div class="ppo-dot"></div><div class="ppo-dot" style="width:22px;opacity:.6"></div><div class="ppo-dot" style="width:26px;opacity:.7"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <div class="tool-card-tag">Calibration</div>
+                    <h2 class="tool-card-title">PA Calculator</h2>
+                    <p class="tool-card-desc">Build a pressure advance test matrix across speeds and acceleration values. Flow auto-calculates from line width and layer height. Copy all for OrcaSlicer in one click.</p>
+                    <div class="tool-card-features">
+                        <span class="feature-chip">Auto flow calc</span>
+                        <span class="feature-chip">Per-cell PA values</span>
+                        <span class="feature-chip">OrcaSlicer export</span>
+                        <span class="feature-chip">Adjustable grid</span>
+                    </div>
+                    <div class="tool-card-cta">
+                        <span class="tool-card-link">Open tool <span class="tool-card-arrow">&rarr;</span></span>
+                        <span class="tool-card-boards">OrcaSlicer &middot; Klipper PA</span>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <span>Klipper Tools &middot; Excit3D Community</span>
+        <span>Open source &middot; No data collected</span>
+    </footer>
+
+</body>
+</html>
