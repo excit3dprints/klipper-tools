@@ -242,6 +242,29 @@ function initPaCalc() {
         });
     }
     buildPaTable();
+
+    // Wire import textarea to show/hide Replace button dynamically
+    const importTextarea = document.getElementById('paImportText');
+    if (importTextarea) {
+        importTextarea.addEventListener('input', paUpdateImportButtons);
+    }
+}
+
+function paIsDefaultState() {
+    return JSON.stringify(PA_STATE.speeds) === JSON.stringify(PA_DEFAULTS.speeds)
+        && JSON.stringify(PA_STATE.accels) === JSON.stringify(PA_DEFAULTS.accels)
+        && JSON.stringify(PA_STATE.pa) === JSON.stringify(PA_DEFAULTS.pa);
+}
+
+function paUpdateImportButtons() {
+    const raw = document.getElementById('paImportText')?.value.trim() || '';
+    const replaceBtn = document.getElementById('paBtnReplace');
+    const hint = document.getElementById('paImportHint');
+    if (!replaceBtn) return;
+    // Show Replace only when there's content AND grid is not defaults
+    const showReplace = raw.length > 0 && !paIsDefaultState();
+    replaceBtn.style.display = showReplace ? '' : 'none';
+    if (hint) hint.style.display = showReplace ? '' : 'none';
 }
 
 function paImport(replace = false) {
@@ -278,12 +301,7 @@ function paImport(replace = false) {
     const importedAccels = [...new Set(parsed.map(r => r.accel))].sort((a, b) => a - b);
 
     if (replace) {
-        // If grid has been modified from defaults, confirm before wiping
-        const isDefault = JSON.stringify(PA_STATE.speeds) === JSON.stringify(PA_DEFAULTS.speeds)
-            && JSON.stringify(PA_STATE.accels) === JSON.stringify(PA_DEFAULTS.accels)
-            && JSON.stringify(PA_STATE.pa) === JSON.stringify(PA_DEFAULTS.pa);
-        if (!isDefault && !confirm('Replace the entire grid with imported data?')) return;
-
+        // Button is only shown when grid is non-default, so no confirm needed
         PA_STATE.speeds = [...importedSpeeds];
         PA_STATE.accels = [...importedAccels];
         PA_STATE.pa = importedAccels.map(() => new Array(importedSpeeds.length).fill(0));
@@ -319,6 +337,7 @@ function paImport(replace = false) {
 
     paSaveState();
     buildPaTable();
+    paUpdateImportButtons();
 
     const mode = replace ? 'Replaced grid with' : 'Merged';
     const msg = `${mode} ${filled} value${filled !== 1 ? 's' : ''} · ${importedAccels.length} accel row${importedAccels.length !== 1 ? 's' : ''} · ${importedSpeeds.length} speed column${importedSpeeds.length !== 1 ? 's' : ''}.`

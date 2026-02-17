@@ -74,11 +74,11 @@
                         <div class="card-body">
                             <textarea id="paImportText" rows="5" placeholder="Paste OrcaSlicer PA strings here, one per line:&#10;0.3,10.5,7500&#10;0.2,10.5,15000&#10;0.1,10.5,35000"></textarea>
                             <div class="btn-row">
-                                <button class="btn-primary" onclick="paImport(false)">Merge</button>
-                                <button class="btn-primary" style="background:var(--warning);color:#0d0a12" onclick="paImport(true)">Replace</button>
-                                <button class="btn-secondary" onclick="document.getElementById('paImportText').value=''">Clear</button>
+                                <button class="btn-primary" id="paBtnMerge" onclick="paImport(false)">Import</button>
+                                <button class="btn-primary" id="paBtnReplace" onclick="paImport(true)" style="display:none">Replace All</button>
+                                <button class="btn-secondary" onclick="document.getElementById('paImportText').value='';paUpdateImportButtons()">Clear</button>
                             </div>
-                            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.4rem"><b>Merge</b> adds to existing grid &nbsp;·&nbsp; <b>Replace</b> clears first then imports</div>
+                            <div id="paImportHint" style="font-size:0.72rem;color:var(--text-muted);margin-top:0.4rem;display:none"><b>Replace All</b> clears the grid first</div>
                             <div id="paImportStatus" style="margin-top:0.6rem;font-size:0.78rem;display:none"></div>
                         </div>
                     </div>
@@ -94,13 +94,7 @@
         </div>
     </div>
 
-    <script src="js/boards.js"></script>
-    <script src="js/pin-mapper.js"></script>
-    <script src="js/pin-mapper-ui.js"></script>
-    <script src="js/pa-calc.js"></script
-    </div>
-
-        <script src="js/pa-calc.js"></script>
+    <script src="js/pa-calc.js"></script>
     <script>
         window.addEventListener('DOMContentLoaded', () => { initPaCalc(); });
     </script>
