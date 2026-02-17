@@ -1,17 +1,41 @@
 // PA Calculator logic
 
-const PA_STATE = {
+const PA_DEFAULTS = {
     speeds: [100, 150, 300, 600],
     accels: [7500, 15000, 35000],
     lineWidth: 0.525,
     layerHeight: 0.2,
-    // pa[accelIdx][speedIdx]
     pa: [
         [0.3, 0.3, 0.3, 0.3],
         [0.2, 0.2, 0.2, 0.2],
         [0.1, 0.1, 0.1, 0.1],
     ]
 };
+
+function paLoadState() {
+    try {
+        const saved = localStorage.getItem('pa_state');
+        if (saved) return JSON.parse(saved);
+    } catch(e) {}
+    return JSON.parse(JSON.stringify(PA_DEFAULTS));
+}
+
+function paSaveState() {
+    try { localStorage.setItem('pa_state', JSON.stringify(PA_STATE)); } catch(e) {}
+}
+
+function paResetState() {
+    if (!confirm('Reset all PA values to defaults?')) return;
+    localStorage.removeItem('pa_state');
+    Object.assign(PA_STATE, JSON.parse(JSON.stringify(PA_DEFAULTS)));
+    const lwInput = document.getElementById('paLineWidth');
+    const lhInput = document.getElementById('paLayerHeight');
+    if (lwInput) lwInput.value = PA_STATE.lineWidth;
+    if (lhInput) lhInput.value = PA_STATE.layerHeight;
+    buildPaTable();
+}
+
+const PA_STATE = paLoadState();
 
 // Flow = speed * line_width * layer_height (mm/s * mm * mm = mm³/s)
 function calcFlow(speed, lineWidth, layerHeight) {
@@ -23,7 +47,6 @@ function buildPaTable() {
     const lw = PA_STATE.lineWidth;
     const lh = PA_STATE.layerHeight;
 
-    // Build HTML
     let html = `<div class="pa-table-scroll"><table class="pa-table">`;
 
     // Header row 1: Speed
@@ -39,7 +62,7 @@ function buildPaTable() {
     html += `<th class="pa-add-col"><button class="btn-secondary btn-small pa-add-btn" onclick="paAddSpeed()">+ Speed</button></th>`;
     html += `</tr>`;
 
-    // Header row 2: Flow (auto-calc)
+    // Header row 2: Flow
     html += `<tr>`;
     PA_STATE.speeds.forEach((spd, si) => {
         const flow = calcFlow(spd, lw, lh);
@@ -47,7 +70,7 @@ function buildPaTable() {
     });
     html += `<th></th></tr></thead>`;
 
-    // Body rows: one per accel
+    // Body rows
     html += `<tbody>`;
     PA_STATE.accels.forEach((accel, ai) => {
         html += `<tr>
@@ -65,23 +88,25 @@ function buildPaTable() {
     });
     html += `</tbody></table></div>`;
 
-    // Add accel button
     html += `<button class="btn-secondary btn-small" style="margin-top:0.5rem" onclick="paAddAccel()">+ Accel Row</button>`;
 
     container.innerHTML = html;
 
-    // Attach listeners
+    // Attach listeners — save on every change
     container.querySelectorAll('.pa-speed-input').forEach(inp => inp.addEventListener('change', e => {
         PA_STATE.speeds[+e.target.dataset.si] = parseFloat(e.target.value) || 0;
+        paSaveState();
         buildPaOutput();
         updateFlowHeaders();
     }));
     container.querySelectorAll('.pa-accel-input').forEach(inp => inp.addEventListener('change', e => {
         PA_STATE.accels[+e.target.dataset.ai] = parseFloat(e.target.value) || 0;
+        paSaveState();
         buildPaOutput();
     }));
     container.querySelectorAll('.pa-val-input').forEach(inp => inp.addEventListener('input', e => {
         PA_STATE.pa[+e.target.dataset.ai][+e.target.dataset.si] = parseFloat(e.target.value) || 0;
+        paSaveState();
         buildPaOutput();
     }));
 
@@ -102,7 +127,6 @@ function buildPaOutput() {
     const lh = PA_STATE.layerHeight;
     const outputWrap = document.getElementById('paOutputWrap');
 
-    // Build all strings (no spaces, OrcaSlicer format)
     const allStrings = [];
     PA_STATE.accels.forEach((accel, ai) => {
         PA_STATE.speeds.forEach((spd, si) => {
@@ -168,6 +192,7 @@ function paAddSpeed() {
     const lastSpeed = PA_STATE.speeds[PA_STATE.speeds.length - 1] || 100;
     PA_STATE.speeds.push(lastSpeed * 2);
     PA_STATE.pa.forEach(row => row.push(row[row.length - 1] || 0.3));
+    paSaveState();
     buildPaTable();
 }
 
@@ -175,6 +200,7 @@ function paAddAccel() {
     const lastAccel = PA_STATE.accels[PA_STATE.accels.length - 1] || 7500;
     PA_STATE.accels.push(Math.round(lastAccel * 1.5 / 500) * 500);
     PA_STATE.pa.push(new Array(PA_STATE.speeds.length).fill(0.3));
+    paSaveState();
     buildPaTable();
 }
 
@@ -182,6 +208,7 @@ function paRemoveAccel(ai) {
     if (PA_STATE.accels.length <= 1) return;
     PA_STATE.accels.splice(ai, 1);
     PA_STATE.pa.splice(ai, 1);
+    paSaveState();
     buildPaTable();
 }
 
@@ -194,13 +221,13 @@ function copyPaStr(btn, str) {
 }
 
 function initPaCalc() {
-    // Line width
     const lwInput = document.getElementById('paLineWidth');
     const lhInput = document.getElementById('paLayerHeight');
     if (lwInput) {
         lwInput.value = PA_STATE.lineWidth;
         lwInput.addEventListener('input', e => {
             PA_STATE.lineWidth = parseFloat(e.target.value) || 0.4;
+            paSaveState();
             updateFlowHeaders();
             buildPaOutput();
         });
@@ -209,9 +236,89 @@ function initPaCalc() {
         lhInput.value = PA_STATE.layerHeight;
         lhInput.addEventListener('input', e => {
             PA_STATE.layerHeight = parseFloat(e.target.value) || 0.2;
+            paSaveState();
             updateFlowHeaders();
             buildPaOutput();
         });
     }
     buildPaTable();
+}
+
+function paImport() {
+    const raw = document.getElementById('paImportText').value.trim();
+    const status = document.getElementById('paImportStatus');
+
+    if (!raw) {
+        showImportStatus('Paste some values first.', 'error');
+        return;
+    }
+
+    // Parse lines: PA,Flow,Accel
+    const lines = raw.split('\n').map(l => l.trim()).filter(l => l);
+    const parsed = [];
+    const skipped = [];
+
+    for (const line of lines) {
+        const parts = line.split(',').map(s => parseFloat(s.trim()));
+        if (parts.length !== 3 || parts.some(isNaN)) {
+            skipped.push(line);
+            continue;
+        }
+        const [pa, flow, accel] = parts;
+        // Reverse-calculate speed from flow: speed = flow / (lineWidth * layerHeight)
+        const speed = parseFloat((flow / (PA_STATE.lineWidth * PA_STATE.layerHeight)).toFixed(4));
+        parsed.push({ pa, flow, accel, speed });
+    }
+
+    if (!parsed.length) {
+        showImportStatus(`No valid lines found. Expected format: PA,Flow,Accel (e.g. 0.3,10.5,7500)`, 'error');
+        return;
+    }
+
+    // Collect unique speeds and accels from imported data
+    const importedSpeeds = [...new Set(parsed.map(r => r.speed))].sort((a, b) => a - b);
+    const importedAccels = [...new Set(parsed.map(r => r.accel))].sort((a, b) => a - b);
+
+    // Merge with existing — add any new speeds/accels, keep existing
+    importedSpeeds.forEach(spd => {
+        if (!PA_STATE.speeds.includes(spd)) {
+            PA_STATE.speeds.push(spd);
+            PA_STATE.pa.forEach(row => row.push(0));
+        }
+    });
+    PA_STATE.speeds.sort((a, b) => a - b);
+
+    importedAccels.forEach(accel => {
+        if (!PA_STATE.accels.includes(accel)) {
+            PA_STATE.accels.push(accel);
+            PA_STATE.pa.push(new Array(PA_STATE.speeds.length).fill(0));
+        }
+    });
+    PA_STATE.accels.sort((a, b) => a - b);
+
+    // Fill in the PA values
+    let filled = 0;
+    for (const { pa, accel, speed } of parsed) {
+        const ai = PA_STATE.accels.indexOf(accel);
+        const si = PA_STATE.speeds.indexOf(speed);
+        if (ai !== -1 && si !== -1) {
+            PA_STATE.pa[ai][si] = pa;
+            filled++;
+        }
+    }
+
+    paSaveState();
+    buildPaTable();
+
+    const msg = `Imported ${filled} value${filled !== 1 ? 's' : ''} across ${importedAccels.length} accel row${importedAccels.length !== 1 ? 's' : ''} and ${importedSpeeds.length} speed column${importedSpeeds.length !== 1 ? 's' : ''}.`
+        + (skipped.length ? ` Skipped ${skipped.length} unreadable line${skipped.length !== 1 ? 's' : ''}.` : '');
+    showImportStatus(msg, 'success');
+}
+
+function showImportStatus(msg, type) {
+    const el = document.getElementById('paImportStatus');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.style.color = type === 'error' ? 'var(--error)' : 'var(--success)';
 }
