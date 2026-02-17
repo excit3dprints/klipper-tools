@@ -244,9 +244,8 @@ function initPaCalc() {
     buildPaTable();
 }
 
-function paImport() {
+function paImport(replace = false) {
     const raw = document.getElementById('paImportText').value.trim();
-    const status = document.getElementById('paImportStatus');
 
     if (!raw) {
         showImportStatus('Paste some values first.', 'error');
@@ -265,38 +264,49 @@ function paImport() {
             continue;
         }
         const [pa, flow, accel] = parts;
-        // Reverse-calculate speed from flow: speed = flow / (lineWidth * layerHeight)
-        const speed = parseFloat((flow / (PA_STATE.lineWidth * PA_STATE.layerHeight)).toFixed(4));
+        // Reverse-calculate speed from flow
+        const speed = Math.round(flow / (PA_STATE.lineWidth * PA_STATE.layerHeight));
         parsed.push({ pa, flow, accel, speed });
     }
 
     if (!parsed.length) {
-        showImportStatus(`No valid lines found. Expected format: PA,Flow,Accel (e.g. 0.3,10.5,7500)`, 'error');
+        showImportStatus('No valid lines found. Expected format: PA,Flow,Accel (e.g. 0.3,10.5,7500)', 'error');
         return;
     }
 
-    // Collect unique speeds and accels from imported data
     const importedSpeeds = [...new Set(parsed.map(r => r.speed))].sort((a, b) => a - b);
     const importedAccels = [...new Set(parsed.map(r => r.accel))].sort((a, b) => a - b);
 
-    // Merge with existing — add any new speeds/accels, keep existing
-    importedSpeeds.forEach(spd => {
-        if (!PA_STATE.speeds.includes(spd)) {
-            PA_STATE.speeds.push(spd);
-            PA_STATE.pa.forEach(row => row.push(0));
-        }
-    });
-    PA_STATE.speeds.sort((a, b) => a - b);
+    if (replace) {
+        // If grid has been modified from defaults, confirm before wiping
+        const isDefault = JSON.stringify(PA_STATE.speeds) === JSON.stringify(PA_DEFAULTS.speeds)
+            && JSON.stringify(PA_STATE.accels) === JSON.stringify(PA_DEFAULTS.accels)
+            && JSON.stringify(PA_STATE.pa) === JSON.stringify(PA_DEFAULTS.pa);
+        if (!isDefault && !confirm('Replace the entire grid with imported data?')) return;
 
-    importedAccels.forEach(accel => {
-        if (!PA_STATE.accels.includes(accel)) {
-            PA_STATE.accels.push(accel);
-            PA_STATE.pa.push(new Array(PA_STATE.speeds.length).fill(0));
-        }
-    });
-    PA_STATE.accels.sort((a, b) => a - b);
+        PA_STATE.speeds = [...importedSpeeds];
+        PA_STATE.accels = [...importedAccels];
+        PA_STATE.pa = importedAccels.map(() => new Array(importedSpeeds.length).fill(0));
+    } else {
+        // Merge: add new speeds/accels only
+        importedSpeeds.forEach(spd => {
+            if (!PA_STATE.speeds.includes(spd)) {
+                PA_STATE.speeds.push(spd);
+                PA_STATE.pa.forEach(row => row.push(0));
+            }
+        });
+        PA_STATE.speeds.sort((a, b) => a - b);
 
-    // Fill in the PA values
+        importedAccels.forEach(accel => {
+            if (!PA_STATE.accels.includes(accel)) {
+                PA_STATE.accels.push(accel);
+                PA_STATE.pa.push(new Array(PA_STATE.speeds.length).fill(0));
+            }
+        });
+        PA_STATE.accels.sort((a, b) => a - b);
+    }
+
+    // Fill in PA values
     let filled = 0;
     for (const { pa, accel, speed } of parsed) {
         const ai = PA_STATE.accels.indexOf(accel);
@@ -310,7 +320,8 @@ function paImport() {
     paSaveState();
     buildPaTable();
 
-    const msg = `Imported ${filled} value${filled !== 1 ? 's' : ''} across ${importedAccels.length} accel row${importedAccels.length !== 1 ? 's' : ''} and ${importedSpeeds.length} speed column${importedSpeeds.length !== 1 ? 's' : ''}.`
+    const mode = replace ? 'Replaced grid with' : 'Merged';
+    const msg = `${mode} ${filled} value${filled !== 1 ? 's' : ''} · ${importedAccels.length} accel row${importedAccels.length !== 1 ? 's' : ''} · ${importedSpeeds.length} speed column${importedSpeeds.length !== 1 ? 's' : ''}.`
         + (skipped.length ? ` Skipped ${skipped.length} unreadable line${skipped.length !== 1 ? 's' : ''}.` : '');
     showImportStatus(msg, 'success');
 }
