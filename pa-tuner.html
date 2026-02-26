@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PA Tuner — Klipper Tools</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/pa-tuner.css">
+</head>
+<body class="tool-page">
+
+    <div class="app-topbar">
+        <div class="app-brand">
+            <a href="index.html" class="brand-link">
+                <h1>&#10022; Klipper Tools</h1>
+            </a>
+            <div class="subtitle">Excit3D Community</div>
+        </div>
+        <nav class="tool-nav">
+            <a href="pin-mapper.html" class="tool-nav-link">Pin Mapper</a>
+            <a href="pa-calc.html" class="tool-nav-link">PA Calculator</a>
+            <a href="pa-tuner.html" class="tool-nav-link active">PA Tuner</a>
+            <a href="index.html" class="tool-nav-link tool-nav-home">&#8592; All Tools</a>
+        </nav>
+    </div>
+
+    <div class="container">
+
+        <!-- API Key Setup -->
+        <div id="apiSetup" class="pat-api-setup" style="display:none;">
+            <div class="card" style="margin-bottom:1.25rem;">
+                <div class="card-header">
+                    <span class="card-title">Anthropic API Key</span>
+                    <span style="font-size:0.65rem;color:var(--text-muted);">Required for AI analysis — stored locally only</span>
+                </div>
+                <div class="card-body">
+                    <div style="display:flex;gap:0.5rem;align-items:center;">
+                        <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." style="flex:1;">
+                        <button class="btn-primary btn-small" onclick="saveApiKey()">Save Key</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="pat-tab-bar">
+            <div class="pat-tab active" data-tab="calc" onclick="switchTab('calc')">Calculate</div>
+            <div class="pat-tab" data-tab="analyze" onclick="switchTab('analyze')">Analyze Print</div>
+            <div class="pat-tab" data-tab="table" onclick="switchTab('table')">Speed Table</div>
+        </div>
+
+        <!-- ── Calculate ─────────────────────────────────────────────────────── -->
+        <div class="pat-panel active" id="panel-calc">
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">Printer Configuration</span></div>
+                <div class="card-body">
+                    <div class="pat-grid-3">
+                        <div>
+                            <label class="pat-label">Extruder</label>
+                            <select id="cfgExtruder">
+                                <option value="direct">Direct Drive</option>
+                                <option value="bowden">Bowden</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="pat-label">Nozzle (mm)</label>
+                            <input type="number" id="cfgNozzle" step="0.1" min="0.1" max="2" value="0.4">
+                        </div>
+                        <div>
+                            <label class="pat-label">Layer Height (mm)</label>
+                            <input type="number" id="cfgLayerHeight" step="0.01" min="0.05" max="1" value="0.2">
+                        </div>
+                    </div>
+                    <div class="pat-grid-3" style="margin-top:0.75rem;">
+                        <div>
+                            <label class="pat-label">Line Width (mm)</label>
+                            <input type="number" id="cfgLineWidth" step="0.001" min="0.1" max="2" value="0.4">
+                        </div>
+                        <div>
+                            <label class="pat-label">Outer Wall Speed (mm/s)</label>
+                            <input type="number" id="cfgOuterSpeed" step="1" min="1" value="150">
+                        </div>
+                        <div>
+                            <label class="pat-label">Infill Speed (mm/s)</label>
+                            <input type="number" id="cfgInfillSpeed" step="1" min="1" value="200">
+                        </div>
+                    </div>
+                    <div class="pat-grid-2" style="margin-top:0.75rem;">
+                        <div>
+                            <label class="pat-label">Min Accel (mm/s&sup2;)</label>
+                            <input type="number" id="cfgMinAccel" step="100" min="100" value="3000">
+                        </div>
+                        <div>
+                            <label class="pat-label">Max Accel (mm/s&sup2;)</label>
+                            <input type="number" id="cfgMaxAccel" step="100" min="100" value="10000">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:1rem;">
+                <div class="card-header"><span class="card-title">PA Data</span></div>
+                <div class="card-body">
+                    <div class="pat-mode-toggle">
+                        <button class="pat-mode-btn active" id="modeTripletsBtn" onclick="setInputMode('triplets')">OrcaSlicer Triplets</button>
+                        <button class="pat-mode-btn" id="modeSingleBtn" onclick="setInputMode('single')">Single PA Value</button>
+                    </div>
+                    <div id="inputTriplets">
+                        <label class="pat-label">PA, vol_flow [, accel] &mdash; one row per line, # lines ignored</label>
+                        <textarea id="paTripletsInput" rows="6" placeholder=".0175,13.5&#10;.016,15.78&#10;.013,26.3&#10;.010,47.34&#10;.008,63.12">.0175,13.5
+.016,15.78
+.013,26.3
+.010,47.34
+.008,63.12</textarea>
+                    </div>
+                    <div id="inputSingle" style="display:none;">
+                        <label class="pat-label">Linear PA Value</label>
+                        <input type="number" id="paSingleInput" step="0.001" min="0" value="0.040" style="max-width:180px;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-row" style="margin-top:0.75rem;">
+                <button class="btn-primary" id="calcBtn" onclick="handleCalc()">Calculate</button>
+                <span class="pat-spinner" id="calcSpinner" style="display:none;"></span>
+            </div>
+
+            <div id="calcResults" style="display:none;margin-top:1.25rem;">
+                <div class="pat-model-grid">
+
+                    <div class="pat-model-card pat-card-recipr">
+                        <div class="pat-model-name pat-col-recipr">Reciprocal</div>
+                        <div class="pat-param-row">
+                            <span class="pat-param-key">linear_advance</span>
+                            <span class="pat-param-val" id="res-recipr-la">&mdash;</span>
+                        </div>
+                        <div class="pat-param-row">
+                            <span class="pat-param-key">nonlinear_offset</span>
+                            <span class="pat-param-val" id="res-recipr-offset">&mdash;</span>
+                        </div>
+                        <div class="pat-param-row">
+                            <span class="pat-param-key">linearization_velocity</span>
+                            <span class="pat-param-val" id="res-recipr-vlin">&mdash;</span>
+                        </div>
+                        <div class="pat-r2" id="res-recipr-r2"></div>
+                        <pre class="pat-cfg-pre" id="res-recipr-cfg"></pre>
+                        <button class="btn-copy btn-small" style="margin-top:0.5rem;" id="copyReciprBtn" onclick="copyConfig('recipr')">Copy config</button>
+                    </div>
+
+                    <div class="pat-model-card pat-card-tanh">
+                        <div class="pat-model-name pat-col-tanh">Tanh</div>
+                        <div class="pat-param-row">
+                            <span class="pat-param-key">linear_advance</span>
+                            <span class="pat-param-val" id="res-tanh-la">&mdash;</span>
+                        </div>
+                        <div class="pat-param-row">
+                            <span class="pat-param-key">nonlinear_offset</span>
+                            <span class="pat-param-val" id="res-tanh-offset">&mdash;</span>
+                        </div>
+                        <div class="pat-param-row">
+                            <span class="pat-param-key">linearization_velocity</span>
+                            <span class="pat-param-val" id="res-tanh-vlin">&mdash;</span>
+                        </div>
+                        <div class="pat-r2" id="res-tanh-r2"></div>
+                        <pre class="pat-cfg-pre" id="res-tanh-cfg"></pre>
+                        <button class="btn-copy btn-small" style="margin-top:0.5rem;" id="copyTanhBtn" onclick="copyConfig('tanh')">Copy config</button>
+                    </div>
+
+                </div>
+                <div class="pat-analysis" id="calcAnalysis" style="display:none;"></div>
+            </div>
+
+        </div>
+
+        <!-- ── Analyze Print ─────────────────────────────────────────────────── -->
+        <div class="pat-panel" id="panel-analyze">
+
+            <div class="pat-mode-toggle" style="margin-bottom:1.25rem;">
+                <button class="pat-mode-btn active" id="analyzeCmpBtn" onclick="setAnalyzeMode('compare')">Model Comparison</button>
+                <button class="pat-mode-btn" id="analyzeSeqBtn" onclick="setAnalyzeMode('seq')">Sequential Tuning</button>
+            </div>
+
+            <!-- Compare sub-panel -->
+            <div id="panelCompare">
+                <div class="pat-notice">Print one cube with each model using the parameters from Calculate, then upload photos. Claude will compare them and recommend which model suits your machine.</div>
+                <div class="pat-model-grid" style="margin-bottom:0.75rem;">
+                    <div>
+                        <div class="pat-upload-label pat-col-recipr">Reciprocal cube</div>
+                        <div class="pat-upload-zone" id="zoneRecipr"
+                            ondragover="onDragOver(event,'recipr')" ondragleave="onDragLeave('recipr')"
+                            ondrop="onDrop(event,'recipr')" onclick="document.getElementById('fileRecipr').click()">
+                            <div class="pat-upload-hint">Drop reciprocal cube photos or click</div>
+                            <input type="file" id="fileRecipr" accept="image/*" multiple style="display:none" onchange="loadFiles(this.files,'recipr')">
+                        </div>
+                        <div class="pat-img-grid" id="thumbsRecipr"></div>
+                    </div>
+                    <div>
+                        <div class="pat-upload-label pat-col-tanh">Tanh cube</div>
+                        <div class="pat-upload-zone" id="zoneTanh"
+                            ondragover="onDragOver(event,'tanh')" ondragleave="onDragLeave('tanh')"
+                            ondrop="onDrop(event,'tanh')" onclick="document.getElementById('fileTanh').click()">
+                            <div class="pat-upload-hint">Drop tanh cube photos or click</div>
+                            <input type="file" id="fileTanh" accept="image/*" multiple style="display:none" onchange="loadFiles(this.files,'tanh')">
+                        </div>
+                        <div class="pat-img-grid" id="thumbsTanh"></div>
+                    </div>
+                </div>
+                <div class="pat-params-hint" id="cmpParamsHint" style="display:none;"></div>
+                <div class="btn-row">
+                    <button class="btn-primary" id="cmpBtn" onclick="handleCmpAnalyze()">Compare Models</button>
+                    <button class="btn-secondary" onclick="clearComparison()">Clear</button>
+                    <span class="pat-spinner" id="cmpSpinner" style="display:none;"></span>
+                </div>
+                <div class="pat-analysis" id="cmpAnalysis" style="display:none;"></div>
+            </div>
+
+            <!-- Sequential sub-panel -->
+            <div id="panelSeq" style="display:none;">
+                <div class="pat-notice">Enter parameters for each cube and upload photos. Claude builds on your full tuning history to guide iterative adjustments.</div>
+
+                <div id="seqHistory"></div>
+
+                <div class="card" id="seqNewCard">
+                    <div class="card-header">
+                        <span class="card-title" id="seqCubeLabel">First Cube</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="pat-grid-2" style="margin-bottom:0.75rem;">
+                            <div>
+                                <label class="pat-label">Model</label>
+                                <select id="seqModel">
+                                    <option value="recipr">Reciprocal</option>
+                                    <option value="tanh">Tanh</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="pat-label">linear_advance</label>
+                                <input type="number" id="seqLa" step="0.0001" placeholder="0.007">
+                            </div>
+                        </div>
+                        <div class="pat-grid-2" style="margin-bottom:0.75rem;">
+                            <div>
+                                <label class="pat-label">nonlinear_offset</label>
+                                <input type="number" id="seqOffset" step="0.001" placeholder="0.128">
+                            </div>
+                            <div>
+                                <label class="pat-label">linearization_velocity (mm/s fil.)</label>
+                                <input type="number" id="seqVlin" step="0.1" placeholder="11.8">
+                            </div>
+                        </div>
+                        <div class="pat-grid-2" style="margin-bottom:0.75rem;">
+                            <div>
+                                <label class="pat-label">time_offset (s) &mdash; optional</label>
+                                <input type="number" id="seqTimeOffset" step="0.001" placeholder="0.002">
+                            </div>
+                            <div></div>
+                        </div>
+                        <div class="btn-row" id="seqFillBtns" style="display:none;margin-bottom:0.75rem;">
+                            <button class="btn-small" onclick="fillSeqFromCalc('recipr')">Fill from Reciprocal</button>
+                            <button class="btn-small" onclick="fillSeqFromCalc('tanh')">Fill from Tanh</button>
+                        </div>
+                        <div class="pat-upload-zone" id="zoneSeq"
+                            ondragover="onDragOver(event,'seq')" ondragleave="onDragLeave('seq')"
+                            ondrop="onDrop(event,'seq')" onclick="document.getElementById('fileSeq').click()">
+                            <div class="pat-upload-hint">Drop cube photos &mdash; multiple angles recommended</div>
+                            <input type="file" id="fileSeq" accept="image/*" multiple style="display:none" onchange="loadFiles(this.files,'seq')">
+                        </div>
+                        <div class="pat-img-grid" id="thumbsSeq"></div>
+                        <div class="btn-row" style="margin-top:0.5rem;">
+                            <button class="btn-primary" id="seqBtn" onclick="handleSeqAnalyze()">Analyze First Cube</button>
+                            <button class="btn-secondary" id="seqClearPhotosBtn" style="display:none;" onclick="clearSeqPhotos()">Clear Photos</button>
+                            <span class="pat-spinner" id="seqSpinner" style="display:none;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="seqClearRow" style="display:none;margin-top:0.75rem;">
+                    <button class="btn-small" style="color:var(--error);border-color:rgba(244,63,94,0.4);" onclick="clearSeqHistory()">Clear all history</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── Speed Table ────────────────────────────────────────────────────── -->
+        <div class="pat-panel" id="panel-table">
+            <div class="pat-notice" id="tableEmpty">Run the calculator first to generate a speed table.</div>
+            <div id="tableContent" style="display:none;">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Effective PA by toolhead speed</span></div>
+                    <div class="card-body" style="padding:0;overflow-x:auto;">
+                        <table class="pat-table" id="speedTable"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/pa-tuner.js"></script>
+</body>
+</html>

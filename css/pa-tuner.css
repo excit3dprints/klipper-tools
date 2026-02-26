@@ -1,0 +1,333 @@
+/* ── Model accent colors ──────────────────────────────────────────────────── */
+.pat-col-recipr { color: var(--accent) !important; }
+.pat-col-tanh   { color: var(--warning) !important; }
+
+/* ── Tab bar ──────────────────────────────────────────────────────────────── */
+.pat-tab-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.25rem;
+}
+
+.pat-tab {
+    padding: 0.55rem 1.1rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+    user-select: none;
+}
+
+.pat-tab:hover { color: var(--text-secondary); }
+.pat-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.pat-panel { display: none; }
+.pat-panel.active { display: block; }
+
+/* ── Grid layouts ─────────────────────────────────────────────────────────── */
+.pat-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.pat-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; }
+
+@media (max-width: 720px) { .pat-grid-3 { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .pat-grid-2, .pat-grid-3 { grid-template-columns: 1fr; } }
+
+/* ── Field label ──────────────────────────────────────────────────────────── */
+.pat-label {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+}
+
+/* ── Mode toggle ──────────────────────────────────────────────────────────── */
+.pat-mode-toggle {
+    display: flex;
+    gap: 2px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 3px;
+    width: fit-content;
+    margin-bottom: 1rem;
+}
+
+.pat-mode-btn {
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 0.35rem 0.9rem;
+    background: none;
+    border: none;
+    border-radius: 3px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.pat-mode-btn.active { background: var(--bg-tertiary); color: var(--text-primary); }
+
+/* ── Notice ───────────────────────────────────────────────────────────────── */
+.pat-notice {
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.83rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin-bottom: 1rem;
+}
+
+/* ── Model result cards ───────────────────────────────────────────────────── */
+.pat-model-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+@media (max-width: 640px) { .pat-model-grid { grid-template-columns: 1fr; } }
+
+.pat-model-card {
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.pat-card-recipr { border: 1px solid rgba(184, 111, 255, 0.25); }
+.pat-card-tanh   { border: 1px solid rgba(245, 158, 11, 0.25); }
+
+.pat-model-name {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 0.85rem;
+}
+
+.pat-param-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.pat-param-row:last-of-type { border-bottom: none; }
+
+.pat-param-key {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-family: 'SF Mono', Consolas, monospace;
+}
+
+.pat-param-val {
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-family: 'SF Mono', Consolas, monospace;
+}
+
+.pat-r2 {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    font-family: 'SF Mono', Consolas, monospace;
+}
+
+.pat-cfg-pre {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace;
+    margin-top: 0.75rem;
+    overflow-x: auto;
+    line-height: 1.65;
+    white-space: pre;
+}
+
+/* ── AI analysis block ────────────────────────────────────────────────────── */
+.pat-analysis {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent-dim);
+    border-radius: 4px;
+    padding: 1rem 1.1rem;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-top: 1rem;
+}
+
+.pat-analysis p + p { margin-top: 0.55rem; }
+
+/* ── Upload zone ──────────────────────────────────────────────────────────── */
+.pat-upload-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.pat-upload-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: 6px;
+    padding: 1.25rem;
+    text-align: center;
+    cursor: pointer;
+    background: var(--bg-primary);
+    transition: border-color 0.15s, background 0.15s;
+    margin-bottom: 0.75rem;
+}
+
+.pat-upload-zone:hover,
+.pat-upload-zone.drag-over {
+    border-color: var(--accent-dim);
+    background: var(--accent-glow);
+}
+
+.pat-upload-hint { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+
+/* ── Thumbnails ───────────────────────────────────────────────────────────── */
+.pat-img-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; }
+
+.pat-img-thumb {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.pat-img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.pat-img-remove {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(13, 10, 18, 0.85);
+    border: none;
+    color: var(--error);
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+}
+
+/* ── Sequential history ───────────────────────────────────────────────────── */
+.pat-seq-session {
+    padding: 0.85rem 0.85rem 0.85rem 1rem;
+    margin-bottom: 1rem;
+    border-left: 2px solid var(--border-color);
+}
+
+.pat-seq-session.model-recipr { border-left-color: var(--accent-dim); }
+.pat-seq-session.model-tanh   { border-left-color: rgba(245, 158, 11, 0.5); }
+
+.pat-seq-header {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    font-family: 'SF Mono', Consolas, monospace;
+}
+
+.pat-seq-session.model-recipr .pat-seq-header { color: var(--accent); }
+.pat-seq-session.model-tanh   .pat-seq-header { color: var(--warning); }
+
+.pat-seq-text {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    background: var(--bg-primary);
+    padding: 0.7rem 0.85rem;
+    border-radius: 4px;
+}
+
+.pat-seq-text p + p { margin-top: 0.4rem; }
+
+/* ── Params hint (compare tab) ────────────────────────────────────────────── */
+.pat-params-hint {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    font-family: 'SF Mono', Consolas, monospace;
+    line-height: 1.6;
+}
+
+/* ── Spinner ──────────────────────────────────────────────────────────────── */
+.pat-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: patSpin 0.8s linear infinite;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+@keyframes patSpin { to { transform: rotate(360deg); } }
+
+/* ── Speed table ──────────────────────────────────────────────────────────── */
+.pat-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.pat-table th {
+    position: sticky;
+    top: 0;
+    background: var(--bg-tertiary);
+    padding: 0.5rem 1rem;
+    text-align: left;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.pat-table td {
+    padding: 0.45rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    font-family: 'SF Mono', Consolas, monospace;
+}
+
+.pat-table tr:last-child td { border-bottom: none; }
+.pat-table tr:hover td { background: var(--bg-tertiary); }
+.pat-table .col-recipr { color: var(--accent); }
+.pat-table .col-tanh   { color: var(--warning); }
+.pat-table .col-dim    { color: var(--text-muted); }
+
+/* ── API setup card ───────────────────────────────────────────────────────── */
+.pat-api-setup input[type="password"] { font-family: 'SF Mono', Consolas, monospace; }
+
+/* ── Mobile topbar ────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .pat-tab { font-size: 0.75rem; padding: 0.5rem 0.7rem; }
+}
