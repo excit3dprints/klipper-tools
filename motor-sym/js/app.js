@@ -14,7 +14,8 @@ import { showToast } from './utils.js'; // Import if used directly here
 class App {
     constructor() {
         this.motorManager = new MotorManager();
-        // We pass references and callbacks to Uimanager
+
+        this.simulation = new Simulation('torque-speed-chart'); // Create simulation first
 
         this.uiManager = new UIManager(this.motorManager, this.simulation, {
             addCustomMotor: this.addCustomMotor.bind(this),
@@ -25,7 +26,6 @@ class App {
             exportMotors: this.exportMotors.bind(this)
 
         });
-        this.simulation = new Simulation('torque-speed-chart'); // Graphic Canvas ID
 
         this.urlHandler = new URLHandler(this.motorManager, this.uiManager);
 
@@ -85,6 +85,7 @@ class App {
         const added = this.motorManager.addMotorToSimulation(motor);
         if (added) {
             this.uiManager.updateSelectedMotorsTable();
+            this.uiManager.displayMotorList(); // Sync the modal UI
             this.updateSimulation(); // Recalculate when adding
 
             showToast(`Motor "${motor.brandModel}" added to simulation.`, 'info');
@@ -98,10 +99,9 @@ class App {
 
         this.motorManager.removeMotorFromSimulation(index);
         this.uiManager.updateSelectedMotorsTable();
-        
-        if (this.motorManager.getMotorsForSimulation().length >= 0) {
-            this.updateSimulation(); // Recalculate all
-        }
+        this.uiManager.displayMotorList(); // Sync the modal UI
+
+        this.updateSimulation(); // Recalculate all
 
         if (motor) {
              showToast(`Motor "${motor.brandModel}" removed from simulation.`, 'info');

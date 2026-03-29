@@ -31,9 +31,11 @@ export class URLHandler {
 
 
             // Create the URL
-            const baseUrl = "https://alextverdyy.github.io" // Current page URL
+            const baseUrl = window.location.origin; // Current page URL
 
-            const shareableURL = `${baseUrl}${window.location.pathname}?data=${base64Data}`; // No encodeuricomponent here, Btoa is already safe for URL
+            // Base64 output from btoa() can contain '+', '/' and '=', 
+            // so we must use encodeURIComponent for a valid URL.
+            const shareableURL = `${baseUrl}${window.location.pathname}?data=${encodeURIComponent(base64Data)}`;
 
             return shareableURL;
         } catch (error) {
@@ -108,22 +110,19 @@ export class URLHandler {
         const longUrl = this.generateShareableURL();
         const shortenedUrl = await shortUrl(longUrl); // Use the usefulness
 
-
-        if (!shortenedUrl) {
-            // The error was already shown in Shorturll
-
-            return;
-        }
+        // Fallback to long URL if the shortening service fails (common on localhost)
+        const urlToCopy = shortenedUrl || longUrl;
+        const isShort = !!shortenedUrl;
 
         try {
-            await navigator.clipboard.writeText(shortenedUrl);
-            showToast("Shortened simulation URL copied to clipboard!", 'success');
+            await navigator.clipboard.writeText(urlToCopy);
+            showToast(isShort ? "Shortened URL copied!" : "Full simulation URL copied!", 'success');
         } catch (err) {
             console.error("Failed to copy URL:", err);
             showToast("Failed to copy URL. Please try again.", 'error');
             // As Fallback, Show the URL to copy manually
 
-            prompt("Could not copy automatically. Please copy this link:", shortenedUrl);
+            prompt("Could not copy automatically. Please copy this link:", urlToCopy);
         }
     }
 }

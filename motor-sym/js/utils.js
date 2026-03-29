@@ -60,7 +60,6 @@ export async function shortUrl(urlToShorten) {
         return result.short_url;
     } catch (error) {
         console.error("Error generating shortened URL:", error);
-        showToast("Error generating shortened URL", 'error');
         return undefined; // Undefined returns in case of error
 
     }
