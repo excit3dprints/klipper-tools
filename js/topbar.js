@@ -10,32 +10,43 @@
  */
 (function () {
     const TOOLS = [
-        { href: 'pin-mapper.html',                      label: 'Pin Mapper' },
-        { href: 'pa-calc.html',                         label: 'PA Calculator' },
-        { href: 'pa-tuner.html',                        label: 'PA Tuner' },
-        { href: 'https://alextverdyy.github.io/SMS_Web/', label: 'Stepper Sim', external: true },
+        { href: 'pin-mapper/',     label: 'Pin Mapper' },
+        { href: 'pa-calc/',       label: 'PA Calculator' },
+        { href: 'pa-tuner/',      label: 'PA Tuner' },
+        { href: 'motor-sym/',     label: 'Stepper Sim' },
     ];
 
-    const page = window.location.pathname.split('/').pop() || 'index.html';
+    const currentPath = window.location.pathname;
+    const isInSubDir = TOOLS.some(t => currentPath.includes('/' + t.href)) || currentPath.includes('/motor-sym/');
+    const homeHref = isInSubDir ? '../' : './';
 
     const navLinks = TOOLS.map(function (tool) {
-        const isActive = !tool.external && tool.href === page;
+        const isActive = !tool.external && (currentPath.includes('/' + tool.href));
+        
+        let adjustedHref = tool.href;
+        if (isInSubDir) {
+            // Check if the link points to the directory we are currently in
+            const currentDir = currentPath.split('/').filter(Boolean).pop();
+            const targetDir = tool.href.replace('/', '');
+            adjustedHref = (currentDir === targetDir) ? './' : '../' + tool.href;
+        }
+
         const cls = 'tool-nav-link' + (isActive ? ' active' : '');
         const extra = tool.external ? ' target="_blank"' : '';
-        return '<a href="' + tool.href + '" class="' + cls + '"' + extra + '>' + tool.label + '</a>';
+        return '<a href="' + adjustedHref + '" class="' + cls + '"' + extra + '>' + tool.label + '</a>';
     }).join('\n            ');
 
     const html = [
         '<div class="app-topbar">',
         '    <div class="app-brand">',
-        '        <a href="index.html" class="brand-link">',
+        '        <a href="' + homeHref + '" class="brand-link">',
         '            <h1>&#10022; Klipper Tools</h1>',
         '        </a>',
         '        <div class="subtitle">Excit3D Community</div>',
         '    </div>',
         '    <nav class="tool-nav">',
         '        ' + navLinks,
-        '        <a href="index.html" class="tool-nav-link tool-nav-home">&#8592; All Tools</a>',
+        '        <a href="' + homeHref + '" class="tool-nav-link tool-nav-home">&#8592; All Tools</a>',
         '    </nav>',
         '</div>',
     ].join('\n');
