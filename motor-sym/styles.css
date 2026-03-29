@@ -131,7 +131,7 @@ h3 {
   margin-top: 1rem;
 }
 
-.simulation-graph-panel canvas {
+.simulation-graph-panel #torque-speed-chart {
   /* max-width: 90%; */
   width: 100%;
   height: auto;
