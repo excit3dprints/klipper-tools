@@ -959,7 +959,7 @@
       "torqueNCm": 56,
       "inductanceMH": 0.6,
       "resistanceOhms": 0.45,
-      "rotorInertiaGCm2": 85
+      "rotorInertiaGCm2": 82
   },
   {
       "brandModel": "KeliMotor-BJ42D41-14V19",
